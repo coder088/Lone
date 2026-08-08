@@ -15,6 +15,12 @@ class Player{
      float playerJumpForce;
      float velocityY;
      bool isGrounded;
+     bool isAttacking; 
+     Clock attackClock;
+     Clock attackCooldownClock;
+     float attackDuration;
+     float attackCooldown;
+
 
     public:
 
@@ -27,9 +33,15 @@ class Player{
         playerJumpForce = 3.f;
         velocityY = 0.f;
         isGrounded = true;
+        isAttacking = false;
+        attackDuration = 0.2f;
+        attackCooldown = 0.5f;
     }
 
     //getters 
+    float getAttackCooldown(){return attackCooldown;}
+    float getAttackDuration(){return attackDuration;}
+    bool getIsAttacking(){return isAttacking;}
     float getVelocityY(){return velocityY;}
     float getPlayerX(){return playerX;}
     float getPlayerY(){return playerY;}
@@ -40,6 +52,9 @@ class Player{
     bool getIsGrounded(){return isGrounded;}
 
     //setters
+    void setAttackCooldown(float c){attackCooldown = c;}
+    void setAttackDuration(float d){attackDuration = d;}
+    void setIsAttacking(bool i){isAttacking = i;}
     void setVelocityY(float v){velocityY =v;}
     void setPlayerX(float x){playerX = x;}
     void setPlayerY(float y){playerY = y;}
@@ -57,7 +72,7 @@ class Player{
          window.draw(rect);
     }
 
-    void handlePlayerMovement(){
+    void handlePlayerInput(RenderWindow &window){
         if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX != 800 - playerWidth){
             playerX += playerSpeed;
         }
@@ -80,6 +95,16 @@ class Player{
         playerY = groundLevel;
         isGrounded = true;
     }
+    if(Mouse::isButtonPressed(Mouse::Button::Left) && attackCooldownClock.getElapsedTime().asSeconds() > attackCooldown){
+        isAttacking = true;
+        attackClock.restart();
+        attackCooldownClock.restart();
+
+    }
+    if(isAttacking && attackClock.getElapsedTime().asSeconds() > attackDuration){
+        isAttacking = false;
+    }
+
 }
 
 
