@@ -1,111 +1,77 @@
-#pragma once
+#ifndef PLAYER_HPP
+#define PLAYER_HPP 
 #include <SFML/Graphics.hpp>
-#include <optional>
-#include <iostream>
-using namespace sf;
-using namespace std;
-class Player{
-    protected:
-    const float GRAVITY = 0.5f;
-     float playerX;
-     float playerY;
-     float playerSpeed;
-     float playerWidth;
-     float playerHeight;
-     float playerJumpForce;
-     float velocityY;
-     bool isGrounded;
-     bool isAttacking; 
-     Clock attackClock;
-     Clock attackCooldownClock;
-     float attackDuration;
-     float attackCooldown;
+#include <SFML/Graphics/Texture.hpp>
+  enum class PlayerState{
+    Idle = 0,
+    WalkRight = 1,
+    WalkLeft = 2,
+    Jump = 3,
+    Attack = 4
+  };
+  class Player{
+   protected:
+    const float playerJumpForce_ = 10;
+    const float gravity = 0.2f;
+    const float playerWidth = 100;
+    const float playerHeight = 100;
+    const float attackHitboxWidth = 10;
+    const float attackHitboxHeight = 10;
+    const int ssframeWidth = 314;
+    const int ssframeHeight = 251;
+    const int sstotalColumns = 4;
+    const int ssTotalRows = 5;\
+    sf::Texture texture;
+    sf::Sprite sprite;
+    int currentssColumn;
+    PlayerState currentState;
+    sf::Clock ssanimationmClock;
+    float frameDuration;
+    float playerX_;
+    float playerY_;
+    float playerSpeed_;                           
+    float playerVerticalSpeed_;
+    bool isGrounded_;
+    bool isAttacking_;
+    char lastKeyPressed = ' ';
+   public:
+    Player();
+
+    //getters
+    float getPlayerX();
+    float getPlayerY();
+    float getPlayerSpeed();
+    float getPlayerVerticalSpeed();
+    float getGravity();
+    float getPlayerJumpForce();
+    bool getIsGorounded();
+    bool getIsAttacking();
+
+   //setters
+    void setPlayerX(float x);
+    void setPlayerY(float y);
+    void setPlayerSpeed(float s);
+    void setPlayerVerticalSpeed(float s);
+    void setIsGrounded(bool g);
+    void setIsAttacking(bool a);
+
+    int drawPlayer(sf::RenderWindow &window);
+    void handlePlayerMovement();
+    void handlePlayerAttack();
+    void drawPlayerAttackHitbox(sf::RenderWindow &window);
+    void setState(PlayerState newState);
+    void updateAnimation();
+    void setSsPosition(float x,float y);
+  
 
 
-    public:
-
-    Player(){
-        playerX = 400.f;
-        playerY = 300.f;
-        playerSpeed = 2.f;
-        playerWidth = 100.f;
-        playerHeight = 100.f;
-        playerJumpForce = 3.f;
-        velocityY = 0.f;
-        isGrounded = true;
-        isAttacking = false;
-        attackDuration = 0.2f;
-        attackCooldown = 0.5f;
-    }
-
-    //getters 
-    float getAttackCooldown(){return attackCooldown;}
-    float getAttackDuration(){return attackDuration;}
-    bool getIsAttacking(){return isAttacking;}
-    float getVelocityY(){return velocityY;}
-    float getPlayerX(){return playerX;}
-    float getPlayerY(){return playerY;}
-    float getPlayerWidth(){return playerWidth;}
-    float getPlayerheight(){return playerHeight;}
-    float getPlayerSpeed(){return playerSpeed;}
-    float getPlayerJumpForce(){return playerJumpForce;}
-    bool getIsGrounded(){return isGrounded;}
-
-    //setters
-    void setAttackCooldown(float c){attackCooldown = c;}
-    void setAttackDuration(float d){attackDuration = d;}
-    void setIsAttacking(bool i){isAttacking = i;}
-    void setVelocityY(float v){velocityY =v;}
-    void setPlayerX(float x){playerX = x;}
-    void setPlayerY(float y){playerY = y;}
-    void setPlayerSpeed(float s){playerSpeed = s;}
-    void setPlayerWidth(float w){playerWidth = w;}
-    void setPlayerHeight(float h){playerHeight = h;}
-    void setJumpForce(float j){playerJumpForce = j;}
-    void setIsGrounded(bool i){isGrounded = i;}
-
-    void drawPlayer(RenderWindow& window){
-        RectangleShape rect({playerWidth,playerHeight});
-        rect.setPosition({playerX,playerY});
-        rect.setFillColor(Color::Blue);
-        rect.setOutlineColor(Color::Yellow);
-         window.draw(rect);
-    }
-
-    void handlePlayerInput(RenderWindow &window){
-        if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX != 800 - playerWidth){
-            playerX += playerSpeed;
-        }
-        if(Keyboard::isKeyPressed(Keyboard::Key::A) && playerX != 0){
-            playerX -= playerSpeed;
-        }
-        if(Keyboard::isKeyPressed(Keyboard::Key::Space)&& isGrounded){
-            velocityY = -6.0f;
-            isGrounded = false;
-      }
-      if(!isGrounded){
-        velocityY += GRAVITY;
-    }
-    else{
-        velocityY = 0.0f;
-    }
-    playerY += velocityY;
-    float groundLevel =  400.0f - playerHeight;
-    if(playerY >= groundLevel){
-        playerY = groundLevel;
-        isGrounded = true;
-    }
-    if(Mouse::isButtonPressed(Mouse::Button::Left) && attackCooldownClock.getElapsedTime().asSeconds() > attackCooldown){
-        isAttacking = true;
-        attackClock.restart();
-        attackCooldownClock.restart();
-
-    }
-    if(isAttacking && attackClock.getElapsedTime().asSeconds() > attackDuration){
-        isAttacking = false;
-    }
-
-}
 
 
-};
+
+
+  };
+
+
+#endif
+
+
