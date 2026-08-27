@@ -1,6 +1,7 @@
 #include "Player.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <algorithm>
 #include <iostream>
 
 
@@ -16,11 +17,11 @@ const auto WINDOWWIDTH = 800;
     sprite.setTextureRect(IntRect({0,0},{ssframeWidth,ssframeHeight}));
     sprite.setScale({playerWidth / ssframeWidth, playerHeight / ssframeHeight});
     currentssColumn = 0;
-    currentState = PlayerState::Idle;
+    currentState = PlayerState::IdleRight;
     frameDuration = 0.15f;
     playerSpeed_ = 5.0f;
     playerX_ = 400.0f;
-    playerY_ = 400.0f;
+    playerY_ = groundLevel;
     playerVerticalSpeed_ = 0.0f;
     isGrounded_ = true;
     isAttacking_ = false;
@@ -104,25 +105,46 @@ void Player::setSsPosition(float x,float y){
 
 
 void Player::handlePlayerMovement(){
-    if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX_ != WINDOWWIDTH - playerWidth){
-        setState(PlayerState::WalkRight);
-        setPlayerX(playerX_ + playerSpeed_);
+    bool isMoving = false;
+
+    if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX_ < WINDOWWIDTH - playerWidth){
+        setPlayerX(std::min(playerX_ + playerSpeed_, WINDOWWIDTH - playerWidth));
         lastKeyPressed = 'D';
+        isMoving = true;
     }
-    else if(Keyboard::isKeyPressed(Keyboard::Key::A) && playerX_ != 0){
-        setState(PlayerState::WalkLeft);
-        setPlayerX(playerX_ - playerSpeed_);
+    else if(Keyboard::isKeyPressed(Keyboard::Key::A) && playerX_ > 0){
+        setPlayerX(std::max(playerX_ - playerSpeed_, 0.0f));
         lastKeyPressed = 'A';
-    }
-    if(lastKeyPressed == 'D'){
-        setState(PlayerState::WalkRight);
-    }
-    else if(lastKeyPressed == 'A'){
-        setState(PlayerState::WalkLeft);
+        isMoving = true;
     }
 
+    const bool jumpIsPressed = Keyboard::isKeyPressed(Keyboard::Key::Space);
+    if(jumpIsPressed && !jumpWasPressed_ && isGrounded_){
+        playerVerticalSpeed_ = jumpStrenght;
+        isGrounded_ = false;
+    }
+    jumpWasPressed_ = jumpIsPressed;
+
+    if(!isGrounded_){
+        playerVerticalSpeed_ += gravity;
+        playerY_ += playerVerticalSpeed_;
+
+        if(playerY_ >= groundLevel){
+            playerY_ = groundLevel;
+            playerVerticalSpeed_ = 0;
+            isGrounded_ = true;
+        }
+    }
+
+    if(!isGrounded_){
+        setState(lastKeyPressed == 'A' ? PlayerState::JumpLeft : PlayerState::JumpRight);
+    }
+    else if(isMoving){
+        setState(lastKeyPressed == 'D' ? PlayerState::WalkRight : PlayerState::WalkLeft);
+    }
     else{
-        setState(PlayerState::Idle);
+        setState(PlayerState::IdleRight);
+        lastKeyPressed = 'A';
     }
     setSsPosition(playerX_, playerY_);
 }

@@ -3,24 +3,27 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
   enum class PlayerState{
-    Idle = 0,
+    IdleRight = 0,
     WalkRight = 1,
     WalkLeft = 2,
-    Jump = 3,
-    Attack = 4
+    JumpRight = 3,
+    AttackRight = 4,
+    AttackLeft = 5,
+    JumpLeft = 6
   };
   class Player{
    protected:
     const float playerJumpForce_ = 10;
-    const float gravity = 0.2f;
+    const float gravity = 0.5f;
     const float playerWidth = 100;
-    const float playerHeight = 100;
+    const float playerHeight = 100; 
     const float attackHitboxWidth = 10;
     const float attackHitboxHeight = 10;
+    const float groundLevel = 500.0f - playerHeight;
     const int ssframeWidth = 314;
     const int ssframeHeight = 251;
     const int sstotalColumns = 4;
-    const int ssTotalRows = 5;\
+    const int ssTotalRows = 7;
     sf::Texture texture;
     sf::Sprite sprite;
     int currentssColumn;
@@ -31,8 +34,10 @@
     float playerY_;
     float playerSpeed_;                           
     float playerVerticalSpeed_;
+    float jumpStrenght = -12.f;
     bool isGrounded_;
     bool isAttacking_;
+    bool jumpWasPressed_ = false;
     char lastKeyPressed = ' ';
    public:
     Player();
