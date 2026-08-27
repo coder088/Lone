@@ -23,9 +23,6 @@ int main() {
         player.handlePlayerAttack();  
         player.updateAnimation();
         player.drawPlayer(window);
-        if(player.getIsAttacking()){
-            player.drawPlayerAttackHitbox(window);
-        }
         window.display();
       }
         return 0;

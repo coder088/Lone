@@ -96,6 +96,11 @@ void Player::updateAnimation(){
 
         sprite.setTextureRect(IntRect({posX,posY},{ssframeWidth,ssframeHeight}));
         ssanimationmClock.restart();
+
+        if((currentState == PlayerState::AttackRight || currentState == PlayerState::AttackLeft)
+            && currentssColumn == sstotalColumns - 1){
+            isAttacking_ = false;
+        }
     }
 }
 void Player::setSsPosition(float x,float y){
@@ -136,7 +141,10 @@ void Player::handlePlayerMovement(){
         }
     }
 
-    if(!isGrounded_){
+    if(isAttacking_){
+        setState(currentState);
+    }
+    else if(!isGrounded_){
         setState(lastKeyPressed == 'A' ? PlayerState::JumpLeft : PlayerState::JumpRight);
     }
     else if(isMoving){
@@ -144,7 +152,6 @@ void Player::handlePlayerMovement(){
     }
     else{
         setState(PlayerState::IdleRight);
-        lastKeyPressed = 'A';
     }
     setSsPosition(playerX_, playerY_);
 }
@@ -152,14 +159,19 @@ void Player::handlePlayerMovement(){
 void Player::handlePlayerAttack(){ 
   if(Mouse::isButtonPressed(Mouse::Button::Left)){
     isAttacking_ = true;
-    std::cout << "isAttacking:" << isAttacking_  <<"\n "; // todo fix the spawn position of the hitbox, make it disappear
+   if(lastKeyPressed == 'D'){
+    setState(PlayerState::AttackRight);
+   }
+   else if(lastKeyPressed == 'A'|| lastKeyPressed == ' '){
+    setState(PlayerState::AttackLeft);
+   }
   }
 }
 
-void Player::drawPlayerAttackHitbox(RenderWindow &window){
+/* void Player::drawPlayerAttackHitbox(RenderWindow &window){
   RectangleShape attackHitbox({attackHitboxWidth,attackHitboxHeight});
   attackHitbox.setFillColor(Color::Yellow);
-  attackHitbox.setPosition({playerX_ + playerWidth,playerY_ /2 + attackHitboxHeight/2});
+  attackHitbox.setPosition({playerX_ + playerWidth/2,playerY_ });
   window.draw(attackHitbox);
+*/
 
-}
