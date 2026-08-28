@@ -74,3 +74,10 @@ bool Projectile::isOffscreen(float windowWidth, float windowHeight) const{
 ProjectileState Projectile::getState() const{
     return currentState;
 }
+void Projectile::setProjectileDamage(float d){
+    projectileDamage = d;
+}
+
+float Projectile::getProjectileDamage(){return projectileDamage;}
+float Projectile::getProjectileWidth(){return projectileHitboxWidth;}
+float Projectile::getProjectileHeight(){return projectileHitboxHeight;}

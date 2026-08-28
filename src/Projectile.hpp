@@ -29,10 +29,14 @@ class Projectile{
     int currentssColumn;
     float frameDuration;
     float projectileSpeed;
+    float projectileDamage = 10.f;
     bool frameChecked = false;
   public:
   Projectile();
-
+  float getProjectileWidth();
+  float getProjectileHeight();
+  float getProjectileDamage();
+  void setProjectileDamage(float d);
   void drawProjectile(sf::RenderWindow &window);
   void setState(ProjectileState newState);
   void updateAnimation();

@@ -29,6 +29,9 @@ const auto WINDOWWIDTH = 800;
 
  }
 // getters
+std::vector<Projectile> &Player::getProjectile(){
+    return projectiles;
+}
 float Player::getPlayerX(){
     return playerX_;
 }
@@ -133,6 +136,7 @@ void Player::handlePlayerMovement(){
     jumpWasPressed_ = jumpIsPressed;
 
     if(!isGrounded_){
+        
         playerVerticalSpeed_ += gravity;
         playerY_ += playerVerticalSpeed_;
 
@@ -198,10 +202,4 @@ void Player::updateProjectiles(sf::RenderWindow &window){
     }
 }
 
-/* void Player::drawPlayerAttackHitbox(RenderWindow &window){
-  RectangleShape attackHitbox({attackHitboxWidth,attackHitboxHeight});
-  attackHitbox.setFillColor(Color::Yellow);
-  attackHitbox.setPosition({playerX_ + playerWidth/2,playerY_ });
-  window.draw(attackHitbox);
-*/
 

@@ -10,7 +10,8 @@ list(APPEND CMAKE_PREFIX_PATH "${SFML_ROOT}/lib/cmake/SFML")
 
 find_package(SFML 3 REQUIRED COMPONENTS Graphics Window System Audio)
 
-add_executable(Lone src/main.cpp src/Player.cpp src/Projectile.cpp)
+add_executable(Lone src/main.cpp src/Player.cpp src/Projectile.cpp
+    src/Enemy.cpp)
 target_link_libraries(Lone PRIVATE SFML::Graphics SFML::Window SFML::System SFML::Audio)
 target_compile_definitions(Lone PRIVATE SFML_STATIC)
 

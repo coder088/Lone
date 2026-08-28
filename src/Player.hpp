@@ -56,6 +56,7 @@
     float getPlayerJumpForce();
     bool getIsGorounded();
     bool getIsAttacking();
+    std::vector<Projectile> &getProjectile();
 
    //setters
     void setPlayerX(float x);
