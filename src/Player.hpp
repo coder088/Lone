@@ -2,6 +2,8 @@
 #define PLAYER_HPP 
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <vector>
+#include "Projectile.hpp"
   enum class PlayerState{
     IdleRight = 0,
     WalkRight = 1,
@@ -39,6 +41,9 @@
     bool isAttacking_;
     bool jumpWasPressed_ = false;
     char lastKeyPressed = ' ';
+    std::vector<Projectile> projectiles;
+    sf::Clock projectileClock;
+    float projectileCooldown = 0.4f; // seconds between shots
    public:
     Player();
 
@@ -63,6 +68,7 @@
     int drawPlayer(sf::RenderWindow &window);
     void handlePlayerMovement();
     void handlePlayerAttack();
+    void updateProjectiles(sf::RenderWindow &window);
     void drawPlayerAttackHitbox(sf::RenderWindow &window);
     void setState(PlayerState newState);
     void updateAnimation();

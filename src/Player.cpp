@@ -78,6 +78,8 @@ void Player::setIsGrounded(bool i){
 
 int Player::drawPlayer(RenderWindow &window){
     window.draw(sprite);
+    // draw and update projectiles
+    updateProjectiles(window);
     return 0;
 }
 void Player::setState(PlayerState newState){
@@ -157,15 +159,43 @@ void Player::handlePlayerMovement(){
 }
 
 void Player::handlePlayerAttack(){ 
-  if(Mouse::isButtonPressed(Mouse::Button::Left)){
-    isAttacking_ = true;
-   if(lastKeyPressed == 'D'){
-    setState(PlayerState::AttackRight);
-   }
-   else if(lastKeyPressed == 'A'|| lastKeyPressed == ' '){
-    setState(PlayerState::AttackLeft);
-   }
-  }
+    const bool mouseLeft = Mouse::isButtonPressed(Mouse::Button::Left);
+    if(mouseLeft){
+        isAttacking_ = true;
+        if(lastKeyPressed == 'D'){
+            setState(PlayerState::AttackRight);
+        }
+        else if(lastKeyPressed == 'A'|| lastKeyPressed == ' '){
+            setState(PlayerState::AttackLeft);
+        }
+        // spawn projectile if cooldown elapsed
+        if(projectileClock.getElapsedTime().asSeconds() >= projectileCooldown){
+            Projectile p;
+            float spawnX = (lastKeyPressed == 'D') ? (playerX_ + playerWidth) : (playerX_ - 100.0f);
+            float spawnY = playerY_ + playerHeight/2.f - 20.f;
+            p.setSsPosition(spawnX, spawnY);
+          //  std::cerr << "Spawn projectile at " << spawnX << "," << spawnY << "\n";
+            p.setState((lastKeyPressed == 'D') ? ProjectileState::ani1R : ProjectileState::ani1L);
+            projectiles.push_back(p);
+            projectileClock.restart();
+        }
+    }
+}
+
+void Player::updateProjectiles(sf::RenderWindow &window){
+    const float projMoveSpeed = 10.f;
+    for(size_t i = 0; i < projectiles.size(); ++i){
+        Projectile &pr = projectiles[i];
+        pr.updateAnimation();
+        int dir = (static_cast<int>(pr.getState()) < 4) ? 1 : -1;
+        pr.updatePosition(projMoveSpeed * dir);
+        pr.drawProjectile(window);
+        // remove if offscreen
+        if(pr.isOffscreen(WINDOWWIDTH, WINDOWHEIGHT)){
+            projectiles.erase(projectiles.begin() + i);
+            --i;
+        }
+    }
 }
 
 /* void Player::drawPlayerAttackHitbox(RenderWindow &window){
