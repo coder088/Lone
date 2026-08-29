@@ -67,7 +67,7 @@
     void setIsAttacking(bool a);
 
     int drawPlayer(sf::RenderWindow &window);
-    void handlePlayerMovement();
+    void handlePlayerMovement(sf::RenderWindow &window);
     void handlePlayerAttack();
     void updateProjectiles(sf::RenderWindow &window);
     void drawPlayerAttackHitbox(sf::RenderWindow &window);

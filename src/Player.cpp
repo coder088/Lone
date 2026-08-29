@@ -6,8 +6,6 @@
 
 
 using namespace sf;
-const auto WINDOWHEIGHT = 600;
-const auto WINDOWWIDTH = 800;
 
 
  Player::Player() : sprite(texture){
@@ -114,11 +112,11 @@ void Player::setSsPosition(float x,float y){
 }
 
 
-void Player::handlePlayerMovement(){
+void Player::handlePlayerMovement(sf::RenderWindow &window){
     bool isMoving = false;
 
-    if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX_ < WINDOWWIDTH - playerWidth){
-        setPlayerX(std::min(playerX_ + playerSpeed_, WINDOWWIDTH - playerWidth));
+    if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX_ < 800 - playerWidth){
+        setPlayerX(std::min(playerX_ + playerSpeed_, 800 - playerWidth));
         lastKeyPressed = 'D';
         isMoving = true;
     }
@@ -195,7 +193,7 @@ void Player::updateProjectiles(sf::RenderWindow &window){
         pr.updatePosition(projMoveSpeed * dir);
         pr.drawProjectile(window);
         // remove if offscreen
-        if(pr.isOffscreen(WINDOWWIDTH, WINDOWHEIGHT)){
+        if(pr.isOffscreen(800, 600)){
             projectiles.erase(projectiles.begin() + i);
             --i;
         }

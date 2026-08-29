@@ -16,7 +16,7 @@ Projectile::Projectile() : sprite(sharedTexture){
     // Ensure sprite references the loaded shared texture explicitly
     sprite.setTexture(sharedTexture);
     sprite.setTextureRect(sf::IntRect(sf::Vector2i(0,0), sf::Vector2i(ssframeWidth, ssframeHeight)));
-    sprite.setScale(sf::Vector2f(projectileHitboxWidth / static_cast<float>(ssframeWidth), projectileHitboxHeight / static_cast<float>(ssframeHeight)));
+    sprite.setScale(sf::Vector2f(projectileTextWidth / static_cast<float>(ssframeWidth), projectileTextHeight / static_cast<float>(ssframeHeight)));
     currentssColumn = 0;
     currentState = ProjectileState::ani1R;
     frameDuration = 0.10f;
@@ -59,6 +59,10 @@ float Projectile::getX() const{
 
 sf::FloatRect Projectile::getGlobalBounds() const{
     return sprite.getGlobalBounds();
+}
+sf::FloatRect Projectile::getProjectileHitbox(){
+    sf::FloatRect rect({sprite.getPosition().x,sprite.getPosition().y},{projectileHitboxWidth,projectileHitboxHeight});
+    return rect;
 }
 
 bool Projectile::isOffscreen(float windowWidth, float windowHeight) const{

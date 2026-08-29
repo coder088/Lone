@@ -15,8 +15,10 @@ enum class ProjectileState{
 };
 class Projectile{
    protected:
-    static constexpr float projectileHitboxWidth = 160.f;
-    static constexpr float projectileHitboxHeight = 64.f;
+    static constexpr float projectileTextWidth = 160.f;
+    static constexpr float projectileTextHeight = 64.f;
+    static constexpr float projectileHitboxWidth = 140.f;
+    static constexpr float projectileHitboxHeight = 10.f;
     static constexpr int ssframeWidth = 128;
     static constexpr int ssframeHeight = 128;
     static constexpr int sstotalColumns = 4;
@@ -50,6 +52,7 @@ class Projectile{
   // test if projectile is outside the given window bounds
   bool isOffscreen(float windowWidth, float windowHeight) const;
   ProjectileState getState() const;
+  sf::FloatRect getProjectileHitbox();
 
 
 

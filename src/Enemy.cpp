@@ -8,7 +8,7 @@ Enemy::Enemy() : enemySprite(enemyTexture){
     enemyHp = 30.f;
     enemySpeed = 3.0f;
     enemyX = 100;
-    enemyY = 400;
+    enemyY = 450 - enemyHeight*2;
     enemyWidth = 40;
     enemyHeight = 40;
 
@@ -44,12 +44,13 @@ void Enemy::drawEnemy(sf::RenderWindow &window){
 
 void Enemy::checkCollisions(std::vector<Projectile> &projvect){
    
-    sf::FloatRect enemyRect({enemyX,enemyY},{enemyWidth,enemyHeight});
+    sf::FloatRect enemyRect({enemyX,enemyY-enemyHeight},{enemyWidth,enemyHeight});
     for(int i = 0; i < projvect.size(); i++){
-        sf::FloatRect tempRect = projvect[i].getGlobalBounds();
+        sf::FloatRect tempRect = projvect[i].getProjectileHitbox();
         if(enemyRect.findIntersection(tempRect)){
             if(immunityClock.getElapsedTime().asSeconds() >= immunityTime){
             enemyHp -= projvect[i].getProjectileDamage();
+            std::cout << enemyHp << std::endl;
             immunityClock.restart();
         }
     }
