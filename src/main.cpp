@@ -1,5 +1,5 @@
 ﻿#include "Player.hpp"
-#include "Enemy.hpp"
+#include "FallenHuman.cpp"
 #include <SFML/Graphics.hpp>
 #include <optional>
 
@@ -10,12 +10,14 @@ enum class GameState{
 
 int main() {
     sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
-    sf::RenderWindow window(desktopMode, "Lone", sf::Style::Default, sf::State::Fullscreen);
+    sf::RenderWindow window(desktopMode, "Lone", sf::Style::Default, sf::State::Windowed);
     sf::View view(sf::FloatRect({0.f,0.f},{800.f,600.f}));
     window.setView(view);
     window.setFramerateLimit(60);
     Player player;
-    Enemy enemy;
+    Player *playerP = &player;
+   
+    FallenHuman fH({100,400});
     sf::Font font;
     if(!font.openFromFile("CinzelDecorative-Regular.ttf")){
         std::cerr << "an error occurred while loading the text font \n";
@@ -70,7 +72,10 @@ int main() {
         player.handlePlayerMovement(window);
         player.handlePlayerAttack();  
         player.updateAnimation();
-        enemy.checkCollisions(player.getProjectile());
+        fH.updateAnimation();
+        fH.checkCollisionsWithProjectiles(player.getProjectile(),fH.getFhHitboxHeght(),fH.getFhHitboxWidth());
+        fH.handleDeath();
+        fH.checkEnemyAndPlayerPosition(playerP,player.getPlayerX(),player.getPlayerY());
 
     }
 
@@ -86,8 +91,8 @@ int main() {
         else if(currentState == GameState::Game){
             //draw here all the game elements
             player.drawPlayer(window);
-            if(enemy.getEnemyHp() > 0){
-                enemy.drawEnemy(window);
+            if(!fH.getIsDead()){
+                fH.drawEnemy(window);
             }
         }
 

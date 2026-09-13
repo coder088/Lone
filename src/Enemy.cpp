@@ -5,19 +5,12 @@
 
 Enemy::Enemy() : enemySprite(enemyTexture){
     immunityClock.start();
-    enemyHp = 30.f;
-    enemySpeed = 3.0f;
-    enemyX = 100;
-    enemyY = 450 - enemyHeight*2;
-    enemyWidth = 40;
-    enemyHeight = 40;
-
 }
 
-float Enemy::getEnemyWidth(){
+int Enemy::getEnemyWidth(){
     return enemyWidth;
 }
-float Enemy::getEnemyHeight(){
+int Enemy::getEnemyHeight(){
     return enemyHeight;
 }
 float Enemy::getEnemyHp(){
@@ -34,17 +27,12 @@ float Enemy::getEnemyY(){
 }
 
 void Enemy::drawEnemy(sf::RenderWindow &window){
-    //temporary logic to draw a squared foe TODO ADD A SPRITE AND TEXTURE ALONG WITH THE OTHER NECESSARY METHODS
-    sf::RectangleShape enemy;
-    enemy.setFillColor(sf::Color::Green);
-    enemy.setSize({enemyWidth,enemyHeight});
-    enemy.setPosition({enemyX,enemyY});
-    window.draw(enemy);
+    window.draw(enemySprite);
 }
 
-void Enemy::checkCollisions(std::vector<Projectile> &projvect){
+void Enemy::checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,float hitboxH,float hitboxW){
    
-    sf::FloatRect enemyRect({enemyX,enemyY-enemyHeight},{enemyWidth,enemyHeight});
+    sf::FloatRect enemyRect({enemyX,enemyY-hitboxH/2},{hitboxW,hitboxH});
     for(int i = 0; i < projvect.size(); i++){
         sf::FloatRect tempRect = projvect[i].getProjectileHitbox();
         if(enemyRect.findIntersection(tempRect)){

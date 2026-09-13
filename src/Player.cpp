@@ -199,5 +199,9 @@ void Player::updateProjectiles(sf::RenderWindow &window){
         }
     }
 }
+sf::FloatRect Player::getPlayerHitbox(){
+    sf::FloatRect rect({playerX_,playerY_ + playerHitboxHeight/2},{playerHitboxWidht,playerHitboxHeight});
+    return rect;
+}
 
 

@@ -19,6 +19,8 @@
     const float gravity = 0.5f;
     const float playerWidth = 100;
     const float playerHeight = 100; 
+    const float playerHitboxHeight = 110;
+    const float playerHitboxWidht = 110;
     const float attackHitboxWidth = 10;
     const float attackHitboxHeight = 10;
     const float groundLevel = 500.0f - playerHeight;
@@ -65,12 +67,11 @@
     void setPlayerVerticalSpeed(float s);
     void setIsGrounded(bool g);
     void setIsAttacking(bool a);
-
+    sf::FloatRect getPlayerHitbox();
     int drawPlayer(sf::RenderWindow &window);
     void handlePlayerMovement(sf::RenderWindow &window);
     void handlePlayerAttack();
     void updateProjectiles(sf::RenderWindow &window);
-    void drawPlayerAttackHitbox(sf::RenderWindow &window);
     void setState(PlayerState newState);
     void updateAnimation();
     void setSsPosition(float x,float y);

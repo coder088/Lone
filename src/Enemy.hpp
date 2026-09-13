@@ -8,33 +8,38 @@
 //base class for any enemy
 class Enemy{
     protected:
+    
      float enemyHp;
      float enemySpeed;
-     float enemyWidth;
-     float enemyHeight;
+     int enemyWidth;
+     int enemyHeight;
      float enemyX;
      float enemyY;
-     float immunityTime = 1;
+     float immunityTime = 0.75f;
+     float hitboxH;
+     float hitboxW;
+     bool isAttacking;
      sf::Texture enemyTexture;
      sf::Sprite enemySprite;
      sf::Clock animationClock;
      sf::Clock immunityClock;
+     float frameDuration;
+     
 
     
 
 
     public:
-    Enemy();
-     float getEnemyHp();
-     float getEnemySpeed();
-     float getEnemyWidth();
-     float getEnemyHeight();
-     float getEnemyX();
-     float getEnemyY();
-
-     void attack();
-     void drawEnemy(sf::RenderWindow &window);
-     void checkCollisions(std::vector<Projectile> &projvect);
+      Enemy();
+     virtual ~Enemy() = default;
+     virtual float getEnemyHp();
+     virtual float getEnemySpeed();
+     virtual int getEnemyWidth();
+     virtual int getEnemyHeight();
+     virtual float getEnemyX();
+     virtual float getEnemyY();
+     virtual void drawEnemy(sf::RenderWindow &window);
+     virtual void checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,float hitboxH,float hitboxW);
 
 };
 
