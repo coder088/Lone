@@ -1,37 +1,18 @@
+
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include "Enemy.hpp"
 #include "Player.hpp"
+#include "FallenHuman.hpp"
 
-enum class FallenHumanState{
-   Idle = 0,
-   WalkRight = 1,
-   WalkLeft = 2,
-   AttackRight = 3,
-   AttackLeft =4,
-   Death = 5
 
-};
-
-class FallenHuman : public Enemy{
-   private:
-    const  int totalSsColums = 4;
-    const  int totalSsRows = 6;
-    int currentSsColumn = 0;
-    int currentSsRow = 0; 
-    FallenHumanState enemyState = FallenHumanState::Idle;
-    FallenHumanState previousState = FallenHumanState::Idle;
-    bool isDead = false;
-    sf::Clock deathClock;
-    const float deathAnimationDuration = 1.0f;
-    int ssFrameHeight = 171;
-    int ssFrameWidth = 300;
-    public:
-     FallenHuman(sf::Vector2f spawnPos) : Enemy(){
+   
+    FallenHuman::FallenHuman(sf::Vector2f spawnPos) : Enemy(){
       if(!enemyTexture.loadFromFile("assets/FallenHumanSS.png")){
          std::cerr << "an error occurrend while loading the enemy sprite sheet \n";
       }
+       attackDamage = 10;
         enemyHp = 100;
         enemySpeed = 4;
         enemyX = spawnPos.x;
@@ -39,8 +20,12 @@ class FallenHuman : public Enemy{
         enemyWidth = 100;
         enemyHeight = 100;
         hitboxH = 120;
-        hitboxW = 100;
+        hitboxW = 85;
+        attackHitboxW = 50;
+        attackHitboxH = 50;
+
         frameDuration = 0.15f;
+        attackClock.restart();
         enemySprite.setTexture(enemyTexture);
         enemySprite.setTextureRect(sf::IntRect({0,0},{ssFrameWidth,ssFrameHeight}));
         enemySprite.setScale({static_cast<float>(enemyWidth) / ssFrameWidth,
@@ -49,11 +34,21 @@ class FallenHuman : public Enemy{
      }
 
 
-void updateAnimation(){
+void FallenHuman::updateAnimation(){
     // Gestisci lo stato di morte
     if(isDead){
-        if(deathClock.getElapsedTime().asSeconds() >= deathAnimationDuration){
-            // L'animazione di morte è finita, il nemico è completamente scomparso
+      enemyState = FallenHumanState::Death;        
+        // Aggiorna i frame dell'animazione di morte
+        if(animationClock.getElapsedTime().asSeconds() >= frameDuration){
+          if(currentSsColumn < totalSsColums - 1){
+            currentSsColumn++;
+          }
+          int currentRow = static_cast<int>(enemyState);
+          int posX = currentSsColumn * ssFrameWidth;
+          int posY = currentRow * ssFrameHeight;
+
+          enemySprite.setTextureRect(sf::IntRect({posX,posY},{ssFrameWidth,ssFrameHeight}));
+          animationClock.restart();
         }
         return;
     }
@@ -71,21 +66,26 @@ void updateAnimation(){
         if((enemyState == FallenHumanState::AttackRight || enemyState == FallenHumanState::AttackLeft)
             && currentSsColumn == totalSsColums - 1){
             isAttacking = false;
+            attackClock.restart();
             setState(FallenHumanState::Idle);
             }
     }
 }
 
-void checkEnemyAndPlayerPosition(Player *playerP,float x,float y){
+void FallenHuman::checkEnemyAndPlayerPosition(Player *playerP,float x,float y){
    sf::FloatRect playerHiboxRect = playerP -> getPlayerHitbox();
    if(playerHiboxRect.findIntersection(getHitbox())){
-      if(playerP -> getPlayerX() > enemyX){ //checks if the player is further from the screen border than the enemy and if it is it means its on his right
-         setState(FallenHumanState::AttackRight);
-         isAttacking = true;
-      }
-      else{
-         setState(FallenHumanState::AttackLeft);
-         isAttacking = true;
+      // Controlla se il cooldown di attacco è trascorso
+      if(attackClock.getElapsedTime().asSeconds() >= attackCooldown){
+         if(playerP -> getPlayerX() > enemyX){ //checks if the player is further from the screen border than the enemy and if it is it means its on his right
+            setState(FallenHumanState::AttackRight);
+            isAttacking = true;
+         }
+         else{
+            setState(FallenHumanState::AttackLeft);
+            isAttacking = true;
+         }
+         attackClock.restart();
       }
   }
   else{
@@ -96,36 +96,44 @@ void checkEnemyAndPlayerPosition(Player *playerP,float x,float y){
       }
   }
 }
-void setState(FallenHumanState newState){
+void FallenHuman::setState(FallenHumanState newState){
    if(enemyState != newState){
       enemyState = newState;
        currentSsColumn = 0;
        animationClock.restart();
    }
 }
-void handleDeath(){
+void FallenHuman::handleDeath(){
    if(enemyHp <= 0 && !isDead){
       isDead = true;
       setState(FallenHumanState::Death);
       deathClock.restart();
    }
 }
-bool getIsDead(){
+bool FallenHuman::getIsDead(){
    return isDead && deathClock.getElapsedTime().asSeconds() >= deathAnimationDuration;
 }
-void setSsPosition(float x,float y){
+void FallenHuman::setSsPosition(float x,float y){
    enemySprite.setPosition({x,y});
 
 }
-sf::FloatRect getHitbox(){
+sf::FloatRect FallenHuman::getHitbox(){
    sf::FloatRect rect({enemyX,enemyY + hitboxH/2},{hitboxW,hitboxH});
    return rect;
 }
+sf::FloatRect FallenHuman::getAttackHitbox(){
+   sf::FloatRect rect({enemyX + hitboxW,enemyY + hitboxH/2},{attackHitboxW,attackHitboxH});
+   return rect;
+}
 
-float getFhHitboxHeght(){
+float FallenHuman::getFhHitboxHeght(){
    return hitboxH;
 }
-float getFhHitboxWidth(){
+float FallenHuman::getFhHitboxWidth(){
    return hitboxW;
 }
-};
+float FallenHuman::getAttackDamage(){
+   return attackDamage;
+}
+
+

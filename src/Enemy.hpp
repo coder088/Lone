@@ -1,6 +1,5 @@
 #ifndef ENEMY_HPP
 #define ENEMY_HPP
-#include "Player.hpp"
 #include "Projectile.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>

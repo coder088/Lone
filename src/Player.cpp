@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include "FallenHuman.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <algorithm>
@@ -23,6 +24,7 @@ using namespace sf;
     playerVerticalSpeed_ = 0.0f;
     isGrounded_ = true;
     isAttacking_ = false;
+    immunityClock.start();
     setSsPosition(playerX_, playerY_);
 
  }
@@ -202,6 +204,19 @@ void Player::updateProjectiles(sf::RenderWindow &window){
 sf::FloatRect Player::getPlayerHitbox(){
     sf::FloatRect rect({playerX_,playerY_ + playerHitboxHeight/2},{playerHitboxWidht,playerHitboxHeight});
     return rect;
+}
+
+void Player::checkCollisionWithEnemy(FallenHuman *fallenHumanP){
+    sf::FloatRect tempEnemyRect = fallenHumanP ->getHitbox();
+   // sf::FloatRect tempEnemyAttackRect = fallenHumanP ->getAttackHitbox();
+    if(getPlayerHitbox().findIntersection(tempEnemyRect) /*|| getPlayerHitbox().findIntersection(tempEnemyAttackRect)*/){
+        if(immunityClock.getElapsedTime().asSeconds() >= immunityCooldown){
+        playerHp -=fallenHumanP ->getAttackDamage();
+        std::cout << playerHp << std::endl;
+        immunityClock.restart();
+        }
+    
+    }
 }
 
 

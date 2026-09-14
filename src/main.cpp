@@ -1,5 +1,5 @@
 ﻿#include "Player.hpp"
-#include "FallenHuman.cpp"
+#include "FallenHuman.hpp"
 #include <SFML/Graphics.hpp>
 #include <optional>
 
@@ -16,8 +16,8 @@ int main() {
     window.setFramerateLimit(60);
     Player player;
     Player *playerP = &player;
-   
     FallenHuman fH({100,400});
+    FallenHuman *fallenHumanP = &fH;
     sf::Font font;
     if(!font.openFromFile("CinzelDecorative-Regular.ttf")){
         std::cerr << "an error occurred while loading the text font \n";
@@ -72,6 +72,7 @@ int main() {
         player.handlePlayerMovement(window);
         player.handlePlayerAttack();  
         player.updateAnimation();
+        player.checkCollisionWithEnemy(fallenHumanP);
         fH.updateAnimation();
         fH.checkCollisionsWithProjectiles(player.getProjectile(),fH.getFhHitboxHeght(),fH.getFhHitboxWidth());
         fH.handleDeath();
@@ -91,6 +92,7 @@ int main() {
         else if(currentState == GameState::Game){
             //draw here all the game elements
             player.drawPlayer(window);
+            // Disegna il nemico finché l'animazione di morte non è completamente finita
             if(!fH.getIsDead()){
                 fH.drawEnemy(window);
             }

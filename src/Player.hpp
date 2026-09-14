@@ -4,6 +4,8 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <vector>
 #include "Projectile.hpp"
+
+class FallenHuman;
   enum class PlayerState{
     IdleRight = 0,
     WalkRight = 1,
@@ -45,7 +47,10 @@
     char lastKeyPressed = ' ';
     std::vector<Projectile> projectiles;
     sf::Clock projectileClock;
+    float playerHp = 100;
     float projectileCooldown = 0.4f; // seconds between shots
+    sf::Clock immunityClock;
+    float immunityCooldown = 1.0f;
    public:
     Player();
 
@@ -75,7 +80,7 @@
     void setState(PlayerState newState);
     void updateAnimation();
     void setSsPosition(float x,float y);
-  
+    void checkCollisionWithEnemy(FallenHuman *fallenHumanp);
 
 
 
