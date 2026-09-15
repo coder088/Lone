@@ -69,6 +69,7 @@ class FallenHuman;
     bool getIsGorounded();
     bool getIsAttacking();
     bool getIsDead();
+    void respawn();
     std::vector<Projectile> &getProjectile();
 
    //setters
@@ -79,10 +80,10 @@ class FallenHuman;
     void setIsGrounded(bool g);
     void setIsAttacking(bool a);
     sf::FloatRect getPlayerHitbox();
-    int drawPlayer(sf::RenderWindow &window);
-    void handlePlayerMovement(sf::RenderWindow &window);
+    int drawPlayer(sf::RenderWindow &window, float deltaTime);
+    void handlePlayerMovement(float deltaTime);
     void handlePlayerAttack();
-    void updateProjectiles(sf::RenderWindow &window);
+    void updateProjectiles(sf::RenderWindow &window, float deltaTime);
     void setState(PlayerState newState);
     void updateAnimation();
     void setSsPosition(float x,float y);

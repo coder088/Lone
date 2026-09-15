@@ -33,4 +33,10 @@ if(WIN32)
         "${CMAKE_CURRENT_SOURCE_DIR}/assets"
         "$<TARGET_FILE_DIR:Lone>/assets"
     )
+
+    add_custom_command(TARGET Lone POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${SFML_ROOT}/examples/island/resources/tuffy.ttf"
+        "$<TARGET_FILE_DIR:Lone>/assets/tuffy.ttf"
+    )
 endif()

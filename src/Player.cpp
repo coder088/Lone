@@ -65,6 +65,21 @@ bool Player::getIsDead(){
     return isDead;
 }
 
+void Player::respawn(){
+    isDead = false;
+    playerHp = maxPlayerHp;
+    playerX_ = 400.0f;
+    playerY_ = groundLevel;
+    playerVerticalSpeed_ = 0.0f;
+    isGrounded_ = true;
+    isAttacking_ = false;
+    currentState = PlayerState::IdleRight;
+    currentssColumn = 0;
+    sprite.setTextureRect(IntRect({0, 0}, {ssframeWidth, ssframeHeight}));
+    setSsPosition(playerX_, playerY_);
+    immunityClock.restart();
+}
+
 
 
 //setters
@@ -88,10 +103,10 @@ void Player::setIsGrounded(bool i){
 }
 
 
-int Player::drawPlayer(RenderWindow &window){
+int Player::drawPlayer(RenderWindow &window, float deltaTime){
     window.draw(sprite);
     // draw and update projectiles
-    updateProjectiles(window);
+    updateProjectiles(window, deltaTime);
     return 0;
 }
 void Player::setState(PlayerState newState){
@@ -137,16 +152,17 @@ void Player::setSsPosition(float x,float y){
 }
 
 
-void Player::handlePlayerMovement(sf::RenderWindow &window){
+void Player::handlePlayerMovement(float deltaTime){
+    const float distanceScale = deltaTime * 60.0f;
     bool isMoving = false;
 
     if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX_ < 800 - playerWidth){
-        setPlayerX(std::min(playerX_ + playerSpeed_, 800 - playerWidth));
+        setPlayerX(std::min(playerX_ + playerSpeed_ * distanceScale, 800 - playerWidth));
         lastKeyPressed = 'D';
         isMoving = true;
     }
     else if(Keyboard::isKeyPressed(Keyboard::Key::A) && playerX_ > 0){
-        setPlayerX(std::max(playerX_ - playerSpeed_, 0.0f));
+        setPlayerX(std::max(playerX_ - playerSpeed_ * distanceScale, 0.0f));
         lastKeyPressed = 'A';
         isMoving = true;
     }
@@ -159,9 +175,8 @@ void Player::handlePlayerMovement(sf::RenderWindow &window){
     jumpWasPressed_ = jumpIsPressed;
 
     if(!isGrounded_){
-        
-        playerVerticalSpeed_ += gravity;
-        playerY_ += playerVerticalSpeed_;
+        playerVerticalSpeed_ += gravity * distanceScale;
+        playerY_ += playerVerticalSpeed_ * distanceScale;
 
         if(playerY_ >= groundLevel){
             playerY_ = groundLevel;
@@ -208,13 +223,14 @@ void Player::handlePlayerAttack(){
     }
 }
 
-void Player::updateProjectiles(sf::RenderWindow &window){
+void Player::updateProjectiles(sf::RenderWindow &window, float deltaTime){
     const float projMoveSpeed = 10.f;
+    const float distanceScale = deltaTime * 60.0f;
     for(size_t i = 0; i < projectiles.size(); ++i){
         Projectile &pr = projectiles[i];
         pr.updateAnimation();
         int dir = (static_cast<int>(pr.getState()) < 4) ? 1 : -1;
-        pr.updatePosition(projMoveSpeed * dir);
+        pr.updatePosition(projMoveSpeed * dir * distanceScale);
         pr.drawProjectile(window);
         // remove if offscreen
         if(pr.isOffscreen(800, 600)){

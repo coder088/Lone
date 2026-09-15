@@ -28,8 +28,8 @@
         attackClock.restart();
         enemySprite.setTexture(enemyTexture);
         enemySprite.setTextureRect(sf::IntRect({0,0},{ssFrameWidth,ssFrameHeight}));
-        enemySprite.setScale({static_cast<float>(enemyWidth) / ssFrameWidth + 10,
-                              static_cast<float>(enemyHeight) / ssFrameHeight + 10});
+      enemySprite.setScale({static_cast<float>(enemyWidth) / ssFrameWidth,
+                  static_cast<float>(enemyHeight) / ssFrameHeight});
         enemySprite.setPosition({enemyX, enemyY});
      }
 
