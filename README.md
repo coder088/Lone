@@ -112,38 +112,6 @@ This project is both a game and an exploration of how far a single developer can
 
 LONE is currently **in active development**.
 
-### Core
-
-* [x] C++ / SFML foundation
-* [ ] Player systems
-* [ ] Combat
-* [ ] Magic
-* [ ] Enemy AI
-* [ ] Progression
-
-### World
-
-* [ ] Interconnected areas
-* [ ] Exploration
-* [ ] Secrets
-* [ ] Environmental storytelling
-
-### Content
-
-* [ ] Enemies
-* [ ] Bosses
-* [ ] NPCs
-* [ ] Story
-* [ ] Lore
-
-### Polish
-
-* [ ] Audio
-* [ ] Optimization
-* [ ] Balancing
-* [ ] Final polish
-
----
 
 # 📸 Screenshots
 
