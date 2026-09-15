@@ -19,23 +19,22 @@ enum class FallenHumanState{
 
 class FallenHuman : public Enemy{
    private:
-    const  int totalSsColums = 4;
-    const  int totalSsRows = 6;
+   static constexpr   int totalSsColums = 4;
+   static constexpr   int totalSsRows = 6;
+   static constexpr float attackCooldown = 0.5f;
+   static constexpr  float deathAnimationDuration = 1.0f;
     int currentSsColumn = 0;
     int currentSsRow = 0; 
     FallenHumanState enemyState = FallenHumanState::Idle;
     FallenHumanState previousState = FallenHumanState::Idle;
     bool isDead = false;
     sf::Clock deathClock;
-    const float deathAnimationDuration = 1.0f;
     sf::Clock attackClock;
-    const float attackCooldown = 0.5f;
     int ssFrameHeight = 171;
     int ssFrameWidth = 300;
     float attackHitboxW;
     float attackHitboxH;
     float attackDamage;
-    
    public:
     FallenHuman(sf::Vector2f spawnPos);
     void updateAnimation();

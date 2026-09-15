@@ -69,14 +69,16 @@ int main() {
     }
     if(currentState == GameState::Game){
         //update here all the game logic
-        player.handlePlayerMovement(window);
-        player.handlePlayerAttack();  
+        if(!player.getIsDead()){
+            player.handlePlayerMovement(window);
+            player.handlePlayerAttack();
+            player.checkCollisionWithEnemy(fallenHumanP);
+            fH.checkCollisionsWithProjectiles(player.getProjectile(),fH.getFhHitboxHeght(),fH.getFhHitboxWidth());
+            fH.handleDeath();
+            fH.checkEnemyAndPlayerPosition(playerP,player.getPlayerX(),player.getPlayerY());
+        }
         player.updateAnimation();
-        player.checkCollisionWithEnemy(fallenHumanP);
         fH.updateAnimation();
-        fH.checkCollisionsWithProjectiles(player.getProjectile(),fH.getFhHitboxHeght(),fH.getFhHitboxWidth());
-        fH.handleDeath();
-        fH.checkEnemyAndPlayerPosition(playerP,player.getPlayerX(),player.getPlayerY());
 
     }
 

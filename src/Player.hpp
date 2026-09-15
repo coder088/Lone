@@ -13,23 +13,26 @@ class FallenHuman;
     JumpRight = 3,
     AttackRight = 4,
     AttackLeft = 5,
-    JumpLeft = 6
+    JumpLeft = 6,
+    DeathR = 7,
+    DeathL = 8,
+    IdleLeft = 9
   };
   class Player{
    protected:
-    const float playerJumpForce_ = 10;
-    const float gravity = 0.5f;
-    const float playerWidth = 100;
-    const float playerHeight = 100; 
-    const float playerHitboxHeight = 110;
-    const float playerHitboxWidht = 110;
-    const float attackHitboxWidth = 10;
-    const float attackHitboxHeight = 10;
-    const float groundLevel = 500.0f - playerHeight;
-    const int ssframeWidth = 314;
-    const int ssframeHeight = 251;
-    const int sstotalColumns = 4;
-    const int ssTotalRows = 7;
+    static constexpr float playerJumpForce_ = 10;
+    static constexpr  float gravity = 0.5f;
+    static constexpr  float playerWidth = 100;
+    static constexpr  float playerHeight = 100; 
+    static constexpr  float playerHitboxHeight = 110;
+    static constexpr  float playerHitboxWidht = 110;
+    static constexpr float maxPlayerHp = 100.0f;
+    static constexpr  float attackHitboxHeight = 10;
+    static constexpr  float groundLevel = 500.0f - playerHeight;
+    static constexpr  int ssframeWidth = 314;
+    static constexpr  int ssframeHeight = 251;
+    static constexpr  int sstotalColumns = 4;
+    static constexpr  int ssTotalRows = 9;
     sf::Texture texture;
     sf::Sprite sprite;
     int currentssColumn;
@@ -47,10 +50,11 @@ class FallenHuman;
     char lastKeyPressed = ' ';
     std::vector<Projectile> projectiles;
     sf::Clock projectileClock;
-    float playerHp = 100;
+    float playerHp = maxPlayerHp;
     float projectileCooldown = 0.4f; // seconds between shots
     sf::Clock immunityClock;
     float immunityCooldown = 1.0f;
+    bool isDead = false;
    public:
     Player();
 
@@ -61,8 +65,10 @@ class FallenHuman;
     float getPlayerVerticalSpeed();
     float getGravity();
     float getPlayerJumpForce();
+    float getPlayerHp();
     bool getIsGorounded();
     bool getIsAttacking();
+    bool getIsDead();
     std::vector<Projectile> &getProjectile();
 
    //setters

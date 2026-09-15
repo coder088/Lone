@@ -52,12 +52,20 @@ float Player::getGravity(){
 float Player::getPlayerVerticalSpeed(){
     return playerVerticalSpeed_;
 }
+float Player::getPlayerHp(){
+    return playerHp;
+}
 bool Player::getIsAttacking(){
     return isAttacking_;
 }
 bool Player::getIsGorounded(){
     return isGrounded_;
 }
+bool Player::getIsDead(){
+    return isDead;
+}
+
+
 
 //setters
 void Player::setPlayerSpeed(float s){
@@ -79,6 +87,7 @@ void Player::setIsGrounded(bool i){
     isGrounded_ = i;
 }
 
+
 int Player::drawPlayer(RenderWindow &window){
     window.draw(sprite);
     // draw and update projectiles
@@ -93,6 +102,20 @@ void Player::setState(PlayerState newState){
     }
 }
 void Player::updateAnimation(){
+    if(isDead){
+        if(ssanimationmClock.getElapsedTime().asSeconds() >= frameDuration){
+            if(currentssColumn < sstotalColumns - 1){
+                currentssColumn++;
+                int currentRow = static_cast<int>(currentState);
+                int posX = currentssColumn * ssframeWidth;
+                int posY = currentRow * ssframeHeight;
+                sprite.setTextureRect(sf::IntRect({posX,posY},{ssframeWidth,ssframeHeight}));
+            }
+            ssanimationmClock.restart();
+        }
+        return;
+    }
+
     if(ssanimationmClock.getElapsedTime().asSeconds() >= frameDuration){
         currentssColumn = (currentssColumn + 1) % sstotalColumns;
         int currentRow = static_cast<int>(currentState);
@@ -157,7 +180,7 @@ void Player::handlePlayerMovement(sf::RenderWindow &window){
         setState(lastKeyPressed == 'D' ? PlayerState::WalkRight : PlayerState::WalkLeft);
     }
     else{
-        setState(PlayerState::IdleRight);
+        setState(lastKeyPressed =='D' ? PlayerState::IdleLeft : PlayerState::IdleRight); //the names are wrong im too lazy to change them
     }
     setSsPosition(playerX_, playerY_);
 }
@@ -178,7 +201,6 @@ void Player::handlePlayerAttack(){
             float spawnX = (lastKeyPressed == 'D') ? (playerX_ + playerWidth) : (playerX_ - 100.0f);
             float spawnY = playerY_ + playerHeight/2.f - 20.f;
             p.setSsPosition(spawnX, spawnY);
-          //  std::cerr << "Spawn projectile at " << spawnX << "," << spawnY << "\n";
             p.setState((lastKeyPressed == 'D') ? ProjectileState::ani1R : ProjectileState::ani1L);
             projectiles.push_back(p);
             projectileClock.restart();
@@ -207,11 +229,22 @@ sf::FloatRect Player::getPlayerHitbox(){
 }
 
 void Player::checkCollisionWithEnemy(FallenHuman *fallenHumanP){
+    if(isDead || fallenHumanP == nullptr || fallenHumanP->getIsDead()){
+        return;
+    }
+
     sf::FloatRect tempEnemyRect = fallenHumanP ->getHitbox();
    // sf::FloatRect tempEnemyAttackRect = fallenHumanP ->getAttackHitbox();
     if(getPlayerHitbox().findIntersection(tempEnemyRect) /*|| getPlayerHitbox().findIntersection(tempEnemyAttackRect)*/){
         if(immunityClock.getElapsedTime().asSeconds() >= immunityCooldown){
-        playerHp -=fallenHumanP ->getAttackDamage();
+        playerHp = std::max(0.0f, playerHp - fallenHumanP->getAttackDamage());
+        if(playerHp <= 0.0f){
+            isDead = true;
+            isAttacking_ = false;
+            currentState = lastKeyPressed == 'D' ? PlayerState::DeathR : PlayerState::DeathL;
+            currentssColumn = 0;
+            ssanimationmClock.restart();
+        }
         std::cout << playerHp << std::endl;
         immunityClock.restart();
         }
