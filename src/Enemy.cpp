@@ -30,6 +30,10 @@ void Enemy::drawEnemy(sf::RenderWindow &window){
     window.draw(enemySprite);
 }
 
+void Enemy::checkCollisionsWithProjectiles(std::vector<Projectile> &projvect){
+    checkCollisionsWithProjectiles(projvect, hitboxH, hitboxW);
+}
+
 void Enemy::checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,float hitboxH,float hitboxW){
    
     sf::FloatRect enemyRect({enemyX,enemyY-hitboxH/2},{hitboxW,hitboxH});
@@ -40,10 +44,31 @@ void Enemy::checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,flo
             enemyHp -= projvect[i].getProjectileDamage();
             std::cout << enemyHp << std::endl;
             immunityClock.restart();
+            }
         }
     }
+}
 
-        }
-    }
+void Enemy::updateAnimation() {}
+
+void Enemy::checkEnemyAndPlayerPosition(Player *, float, float) {}
+
+void Enemy::handleDeath() {}
+
+bool Enemy::getIsDead() const {
+    return false;
+}
+
+sf::FloatRect Enemy::getHitbox() const {
+    return sf::FloatRect({enemyX, enemyY + hitboxH / 2.0f}, {hitboxW, hitboxH});
+}
+
+sf::FloatRect Enemy::getAttackHitbox() const {
+    return sf::FloatRect({enemyX, enemyY + hitboxH / 2.0f}, {hitboxW, hitboxH});
+}
+
+float Enemy::getAttackDamage() const {
+    return 0.0f;
+}
 
 

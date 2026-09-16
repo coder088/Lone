@@ -1,3 +1,8 @@
+
+#include <map>
+#include <algorithm>
+#include<vector> //idk why but adding those here fixed a lot of problems even if they are already included below. DONT TUCH PLS
+
 ///
 /// T I L E S O N   V E R S I O N   1 . 4 . 0
 /// ------------------------------------------------
@@ -9300,5 +9305,5 @@ void tson::Property::setValueByType(IJson &json)
 
 /*** End of inlined file: tileson_forward.hpp ***/
 
-#endif //TILESON_TILESON_H
+#endif 
 

@@ -5,7 +5,7 @@
 #include <vector>
 #include "Projectile.hpp"
 
-class FallenHuman;
+class Enemy;
   enum class PlayerState{
     IdleRight = 0,
     WalkRight = 1,
@@ -20,12 +20,11 @@ class FallenHuman;
   };
   class Player{
    protected:
-    static constexpr float playerJumpForce_ = 10;
     static constexpr  float gravity = 0.5f;
     static constexpr  float playerWidth = 100;
     static constexpr  float playerHeight = 100; 
     static constexpr  float playerHitboxHeight = 110;
-    static constexpr  float playerHitboxWidht = 110;
+    static constexpr  float playerHitboxWidht = 75;
     static constexpr float maxPlayerHp = 100.0f;
     static constexpr  float attackHitboxHeight = 10;
     static constexpr  float groundLevel = 500.0f - playerHeight;
@@ -43,7 +42,7 @@ class FallenHuman;
     float playerY_;
     float playerSpeed_;                           
     float playerVerticalSpeed_;
-    float jumpStrenght = -12.f;
+    float jumpStrenght = -16.f;
     bool isGrounded_;
     bool isAttacking_;
     bool jumpWasPressed_ = false;
@@ -64,7 +63,6 @@ class FallenHuman;
     float getPlayerSpeed();
     float getPlayerVerticalSpeed();
     float getGravity();
-    float getPlayerJumpForce();
     float getPlayerHp();
     bool getIsGorounded();
     bool getIsAttacking();
@@ -87,7 +85,8 @@ class FallenHuman;
     void setState(PlayerState newState);
     void updateAnimation();
     void setSsPosition(float x,float y);
-    void checkCollisionWithEnemy(FallenHuman *fallenHumanp);
+    void handlePlayerMovement(float deltaTime, const std::vector<sf::FloatRect>& collisionBoxes);
+    void checkCollisionWithEnemy(Enemy *enemy);
 
 
 

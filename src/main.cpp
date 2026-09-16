@@ -1,5 +1,6 @@
 ﻿#include "Player.hpp"
-#include "FallenHuman.hpp"
+#include "Enemy.hpp"
+#include "Room.hpp"
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <iostream>
@@ -16,11 +17,17 @@ int main() {
     sf::RenderWindow window(desktopMode, "Lone", sf::Style::Default, sf::State::Fullscreen);
     sf::View view(sf::FloatRect({0.f,0.f},{800.f,600.f}));
     window.setView(view);
-    window.setFramerateLimit(60);
     Player player;
     Player *playerP = &player;
-    FallenHuman fH({100,400});
-    FallenHuman *fallenHumanP = &fH;
+    Room room;
+    const bool roomLoaded = room.loadFromFile("assets/room.json");
+    //keeps a weird enemy position in case the map doesnt load in order to stop the game from crashing
+    if (!roomLoaded) {
+
+        // Keep the current playable setup until the first Tiled room is added.
+        room.addEnemy("FallenHuman", sf::Vector2f(200.f, 200.f));
+        
+    }
     sf::Font font;
     // Fade overlays use the game view's 800x600 coordinates.
     sf::RectangleShape fadeOutOverlay(sf::Vector2f(windowWidth, windowHeight));
@@ -81,8 +88,9 @@ int main() {
                     window.close();
                 }
             
-             
+        
                 if(keyPressed->scancode == sf::Keyboard::Scancode::Space){
+                
                     currentState = GameState::Game;
                     fadeInAlpha = 255.0f;
                     isFadeInActive = true;
@@ -111,15 +119,21 @@ int main() {
     if(currentState == GameState::Game){
         //update here all the game logic
         if(!player.getIsDead()){
-            player.handlePlayerMovement(deltaTime);
+     
+            player.handlePlayerMovement(deltaTime, room.getCollisionBoxes());
             player.handlePlayerAttack();
-            player.checkCollisionWithEnemy(fallenHumanP);
-            fH.checkCollisionsWithProjectiles(player.getProjectile(),fH.getFhHitboxHeght(),fH.getFhHitboxWidth());
-            fH.handleDeath();
-            fH.checkEnemyAndPlayerPosition(playerP,player.getPlayerX(),player.getPlayerY());
-        }
+            for (const std::unique_ptr<Enemy> &enemy : room.getEnemies()) {
+                player.checkCollisionWithEnemy(enemy.get());
+                enemy->checkCollisionsWithProjectiles(player.getProjectile());
+                enemy->handleDeath();
+                enemy->checkEnemyAndPlayerPosition(playerP, player.getPlayerX(), player.getPlayerY());
+            }
+        
+    }
         player.updateAnimation();
-        fH.updateAnimation();
+        for (const std::unique_ptr<Enemy> &enemy : room.getEnemies()) {
+            enemy->updateAnimation();
+        }
         if (isFadeInActive) {
             fadeInAlpha -= fadeInSpeed * deltaTime;
             if (fadeInAlpha <= 0.0f) {
@@ -149,29 +163,26 @@ int main() {
         window.draw(exitGametext);
     }
     else if(currentState == GameState::Game){
+        window.draw(room);
         player.drawPlayer(window, deltaTime);
-        if(!fH.getIsDead()){
-            fH.drawEnemy(window);
+        for (const std::unique_ptr<Enemy> &enemy : room.getEnemies()) {
+            if (!enemy->getIsDead()) {
+                enemy->drawEnemy(window);
+            }
         }
         if(player.getIsDead()){
             window.draw(fadeOutOverlay);
-        }
+         }
         if (player.getIsDead() && isFadeComplete) {
             window.draw(youDiedText);
             window.draw(deathScreenText);
-        }
+            }
         if (isFadeInActive) {
             window.draw(fadeInOverlay);
+         }
         }
-    }
 
     window.display();
-}
-        return 0;
     }
-
-
-  
-
-
-
+        return 0;
+ }

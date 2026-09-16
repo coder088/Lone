@@ -12,10 +12,10 @@
       if(!enemyTexture.loadFromFile("assets/FallenHumanSS.png")){
          std::cerr << "an error occurrend while loading the enemy sprite sheet \n";
       }
-       attackDamage = 10;
+        attackDamage = 10;
         enemyHp = 100;
         enemySpeed = 4;
-        enemyX = spawnPos.x;
+        enemyX = spawnPos.x;  
         enemyY = spawnPos.y;
         enemyWidth = 100;
         enemyHeight = 100;
@@ -110,18 +110,18 @@ void FallenHuman::handleDeath(){
       deathClock.restart();
    }
 }
-bool FallenHuman::getIsDead(){
+bool FallenHuman::getIsDead() const{
    return isDead && deathClock.getElapsedTime().asSeconds() >= deathAnimationDuration;
 }
 void FallenHuman::setSsPosition(float x,float y){
    enemySprite.setPosition({x,y});
 
 }
-sf::FloatRect FallenHuman::getHitbox(){
+sf::FloatRect FallenHuman::getHitbox() const{
    sf::FloatRect rect({enemyX,enemyY + hitboxH/2},{hitboxW,hitboxH});
    return rect;
 }
-sf::FloatRect FallenHuman::getAttackHitbox(){
+sf::FloatRect FallenHuman::getAttackHitbox() const{
    sf::FloatRect rect({enemyX + hitboxW,enemyY + hitboxH/2},{attackHitboxW,attackHitboxH});
    return rect;
 }
@@ -132,7 +132,7 @@ float FallenHuman::getFhHitboxHeght(){
 float FallenHuman::getFhHitboxWidth(){
    return hitboxW;
 }
-float FallenHuman::getAttackDamage(){
+float FallenHuman::getAttackDamage() const{
    return attackDamage;
 }
 

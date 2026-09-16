@@ -37,17 +37,17 @@ class FallenHuman : public Enemy{
     float attackDamage;
    public:
     FallenHuman(sf::Vector2f spawnPos);
-    void updateAnimation();
-    void checkEnemyAndPlayerPosition(Player *playerP,float x,float y);
+    void updateAnimation() override;
+    void checkEnemyAndPlayerPosition(Player *playerP,float x,float y) override;
     void setState(FallenHumanState newState);
-    void handleDeath();
-    bool getIsDead();
+    void handleDeath() override;
+    bool getIsDead() const override;
     void setSsPosition(float x,float y);
-    sf::FloatRect getHitbox();
-    sf::FloatRect getAttackHitbox();
+    sf::FloatRect getHitbox() const override;
+    sf::FloatRect getAttackHitbox() const override;
     float getFhHitboxHeght();
     float getFhHitboxWidth();
-    float getAttackDamage();
+    float getAttackDamage() const override;
 
 
 };

@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <iostream>
+class Player;
+
 //base class for any enemy
 class Enemy{
     protected:
@@ -38,7 +40,15 @@ class Enemy{
      virtual float getEnemyX();
      virtual float getEnemyY();
      virtual void drawEnemy(sf::RenderWindow &window);
+    virtual void checkCollisionsWithProjectiles(std::vector<Projectile> &projvect);
      virtual void checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,float hitboxH,float hitboxW);
+    virtual void updateAnimation();
+    virtual void checkEnemyAndPlayerPosition(Player *playerP, float x, float y);
+    virtual void handleDeath();
+    virtual bool getIsDead() const;
+    virtual sf::FloatRect getHitbox() const;
+    virtual sf::FloatRect getAttackHitbox() const;
+    virtual float getAttackDamage() const;
 
 };
 

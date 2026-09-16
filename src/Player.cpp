@@ -19,7 +19,7 @@ using namespace sf;
     currentState = PlayerState::IdleRight;
     frameDuration = 0.15f;
     playerSpeed_ = 5.0f;
-    playerX_ = 400.0f;
+    playerX_ = 450.0f;
     playerY_ = groundLevel;
     playerVerticalSpeed_ = 0.0f;
     isGrounded_ = true;
@@ -40,9 +40,7 @@ float Player::getPlayerY(){
     return playerY_;
 }
 
-float Player::getPlayerJumpForce(){
-    return playerJumpForce_;
-}
+
 float Player::getPlayerSpeed(){
     return playerSpeed_;
 }
@@ -153,9 +151,16 @@ void Player::setSsPosition(float x,float y){
 
 
 void Player::handlePlayerMovement(float deltaTime){
+    static const std::vector<sf::FloatRect> noCollisionBoxes;
+    handlePlayerMovement(deltaTime, noCollisionBoxes);
+}
+
+void Player::handlePlayerMovement(float deltaTime, const std::vector<sf::FloatRect>& collisionBoxes){
     const float distanceScale = deltaTime * 60.0f;
     bool isMoving = false;
+    const float hitboxOffsetX = (playerWidth - playerHitboxWidht) / 2.0f;
 
+    const float previousX = playerX_;
     if(Keyboard::isKeyPressed(Keyboard::Key::D) && playerX_ < 800 - playerWidth){
         setPlayerX(std::min(playerX_ + playerSpeed_ * distanceScale, 800 - playerWidth));
         lastKeyPressed = 'D';
@@ -167,6 +172,25 @@ void Player::handlePlayerMovement(float deltaTime){
         isMoving = true;
     }
 
+    for (const sf::FloatRect& collisionBox : collisionBoxes) {
+        const bool overlapsY = playerY_ + playerHitboxHeight / 2.0f > collisionBox.position.y
+            && playerY_ + playerHitboxHeight / 2.0f < collisionBox.position.y + collisionBox.size.y;
+        const float previousLeft = previousX + hitboxOffsetX;
+        const float previousRight = previousLeft + playerHitboxWidht;
+        const float nextLeft = playerX_ + hitboxOffsetX;
+        const float nextRight = nextLeft + playerHitboxWidht;
+        const bool hitsLeftSide = previousRight <= collisionBox.position.x
+            && nextRight >= collisionBox.position.x;
+        const bool hitsRightSide = previousLeft >= collisionBox.position.x + collisionBox.size.x
+            && nextLeft <= collisionBox.position.x + collisionBox.size.x;
+
+        if (overlapsY && hitsLeftSide) {
+            playerX_ = collisionBox.position.x - hitboxOffsetX - playerHitboxWidht;
+        } else if (overlapsY && hitsRightSide) {
+            playerX_ = collisionBox.position.x + collisionBox.size.x - hitboxOffsetX;
+        }
+    }
+
     const bool jumpIsPressed = Keyboard::isKeyPressed(Keyboard::Key::Space);
     if(jumpIsPressed && !jumpWasPressed_ && isGrounded_){
         playerVerticalSpeed_ = jumpStrenght;
@@ -176,11 +200,66 @@ void Player::handlePlayerMovement(float deltaTime){
 
     if(!isGrounded_){
         playerVerticalSpeed_ += gravity * distanceScale;
-        playerY_ += playerVerticalSpeed_ * distanceScale;
+        const float previousBottom = playerY_ + playerHeight;
+        const float nextY = playerY_ + playerVerticalSpeed_ * distanceScale;
+        const float nextBottom = nextY + playerHeight;
 
-        if(playerY_ >= groundLevel){
-            playerY_ = groundLevel;
+        float landingY = groundLevel;
+        bool landed = false;
+        bool hitCeiling = false;
+        if (playerVerticalSpeed_ >= 0.0f) {
+            for (const sf::FloatRect& collisionBox : collisionBoxes) {
+                const bool overlapsX = playerX_ + hitboxOffsetX + playerHitboxWidht > collisionBox.position.x
+                    && playerX_ + hitboxOffsetX < collisionBox.position.x + collisionBox.size.x;
+                const bool crossesTop = previousBottom <= collisionBox.position.y
+                    && nextBottom >= collisionBox.position.y;
+                if (overlapsX && crossesTop && (!landed || collisionBox.position.y < landingY)) {
+                    landingY = collisionBox.position.y - playerHeight;
+                    landed = true;
+                }
+            }
+        } else {
+            for (const sf::FloatRect& collisionBox : collisionBoxes) {
+                const bool overlapsX = playerX_ + hitboxOffsetX + playerHitboxWidht > collisionBox.position.x
+                    && playerX_ + hitboxOffsetX < collisionBox.position.x + collisionBox.size.x;
+                const bool crossesBottom = playerY_ >= collisionBox.position.y + collisionBox.size.y
+                    && nextY <= collisionBox.position.y + collisionBox.size.y;
+                if (overlapsX && crossesBottom) {
+                    playerY_ = collisionBox.position.y + collisionBox.size.y;
+                    playerVerticalSpeed_ = 0;
+                    hitCeiling = true;
+                    break;
+                }
+            }
+        }
+
+        if (hitCeiling) {
+            isGrounded_ = false;
+        } else if (landed || nextY >= groundLevel) {
+            playerY_ = landed ? landingY : groundLevel;
             playerVerticalSpeed_ = 0;
+            isGrounded_ = true;
+        } else {
+            playerY_ = nextY;
+        }
+    } else {
+        bool supported = false;
+        const float playerBottom = playerY_ + playerHeight;
+        for (const sf::FloatRect& collisionBox : collisionBoxes) {
+            const bool overlapsX = playerX_ + hitboxOffsetX + playerHitboxWidht > collisionBox.position.x
+                && playerX_ + hitboxOffsetX < collisionBox.position.x + collisionBox.size.x;
+            const bool restsOnTop = std::abs(playerBottom - collisionBox.position.y) < 1.0f;
+            if (overlapsX && restsOnTop) {
+                supported = true;
+                break;
+            }
+        }
+        if (!supported && playerY_ != groundLevel) {
+            isGrounded_ = false;
+        }
+
+        if (playerY_ >= groundLevel) {
+            playerY_ = groundLevel;
             isGrounded_ = true;
         }
     }
@@ -240,20 +319,21 @@ void Player::updateProjectiles(sf::RenderWindow &window, float deltaTime){
     }
 }
 sf::FloatRect Player::getPlayerHitbox(){
-    sf::FloatRect rect({playerX_,playerY_ + playerHitboxHeight/2},{playerHitboxWidht,playerHitboxHeight});
+    const float hitboxOffsetX = (playerWidth - playerHitboxWidht) / 2.0f;
+    sf::FloatRect rect({playerX_ + hitboxOffsetX,playerY_ + playerHitboxHeight/2},{playerHitboxWidht,playerHitboxHeight});
     return rect;
 }
 
-void Player::checkCollisionWithEnemy(FallenHuman *fallenHumanP){
-    if(isDead || fallenHumanP == nullptr || fallenHumanP->getIsDead()){
+void Player::checkCollisionWithEnemy(Enemy *enemy){
+    if(isDead || enemy == nullptr || enemy->getIsDead()){
         return;
     }
 
-    sf::FloatRect tempEnemyRect = fallenHumanP ->getHitbox();
+    sf::FloatRect tempEnemyRect = enemy->getHitbox();
    // sf::FloatRect tempEnemyAttackRect = fallenHumanP ->getAttackHitbox();
     if(getPlayerHitbox().findIntersection(tempEnemyRect) /*|| getPlayerHitbox().findIntersection(tempEnemyAttackRect)*/){
         if(immunityClock.getElapsedTime().asSeconds() >= immunityCooldown){
-        playerHp = std::max(0.0f, playerHp - fallenHumanP->getAttackDamage());
+        playerHp = std::max(0.0f, playerHp - enemy->getAttackDamage());
         if(playerHp <= 0.0f){
             isDead = true;
             isAttacking_ = false;
