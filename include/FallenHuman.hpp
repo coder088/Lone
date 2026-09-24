@@ -41,6 +41,8 @@ class FallenHuman : public Enemy{
     FallenHuman(sf::Vector2f spawnPos);
     void updateAnimation() override;
     void checkEnemyAndPlayerPosition(Player *playerP,float x,float y,float deltaTime) override;
+    void checkEnemyAndPlayerPosition(Player *playerP,float x,float y,float deltaTime,
+        const std::vector<sf::FloatRect>& collisionBoxes) override;
     void setState(FallenHumanState newState);
     void handleDeath() override;
     bool getIsDead() const override;

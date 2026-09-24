@@ -54,6 +54,11 @@ void Enemy::updateAnimation() {}
 
 void Enemy::checkEnemyAndPlayerPosition(Player *, float, float, float) {}
 
+void Enemy::checkEnemyAndPlayerPosition(Player *playerP, float x, float y, float deltaTime,
+    const std::vector<sf::FloatRect>&) {
+    checkEnemyAndPlayerPosition(playerP, x, y, deltaTime);
+}
+
 void Enemy::handleDeath() {}
 
 bool Enemy::getIsDead() const {
@@ -76,5 +81,4 @@ float Enemy::getAttackDamage() const {
     return 0.0f;
 }
 void Enemy::setSsPosition(float x,float y){}
-
 

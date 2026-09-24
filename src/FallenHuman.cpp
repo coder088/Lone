@@ -80,75 +80,97 @@ void FallenHuman::updateAnimation(){
     }
 }
 
-void FallenHuman::checkEnemyAndPlayerPosition(Player *playerP,float, float, float deltaTime){
+void FallenHuman::checkEnemyAndPlayerPosition(Player *playerP, float x, float y, float deltaTime){
+   static const std::vector<sf::FloatRect> noCollisionBoxes;
+   checkEnemyAndPlayerPosition(playerP, x, y, deltaTime, noCollisionBoxes);
+}
+
+void FallenHuman::checkEnemyAndPlayerPosition(Player *playerP, float, float, float deltaTime,
+   const std::vector<sf::FloatRect>& collisionBoxes){
    if (playerP == nullptr || isDead) {
       return;
    }
 
+   const float distanceScale = std::min(deltaTime, 0.05f) * 60.0f;
+   const float hitboxOffsetX = (enemyWidth - hitboxW) / 2.0f;
    const sf::FloatRect playerHitbox = playerP->getPlayerHitbox();
    const sf::FloatRect enemyHitbox = getHitbox();
    const bool canSeePlayerOnYAxis =
       playerHitbox.position.y < enemyHitbox.position.y + enemyHitbox.size.y
       && playerHitbox.position.y + playerHitbox.size.y > enemyHitbox.position.y;
+   const float distanceToPlayer = playerP->getPlayerX() - enemyX;
+   const bool playerIsClose = std::abs(distanceToPlayer) <= triggetDistance;
+   const bool playerIsInAttackRange = playerHitbox.findIntersection(enemyHitbox).has_value();
 
-   if (!canSeePlayerOnYAxis) {
+   if (playerIsInAttackRange && canSeePlayerOnYAxis) {
+      if (!isAttacking && attackClock.getElapsedTime().asSeconds() >= attackCooldown) {
+         setState(distanceToPlayer >= 0.0f ? FallenHumanState::AttackRight
+                                          : FallenHumanState::AttackLeft);
+         isAttacking = true;
+         attackHitboxActive = false;
+         attackClock.restart();
+      }
+   } else if (isAttacking) {
       isAttacking = false;
       attackHitboxActive = false;
       setState(FallenHumanState::Idle);
-      return;
+   } else if (playerIsClose && canSeePlayerOnYAxis) {
+      const float movement = std::clamp(distanceToPlayer,
+         -speed * distanceScale, speed * distanceScale);
+      setState(distanceToPlayer >= 0.0f ? FallenHumanState::WalkRight
+                                       : FallenHumanState::WalkLeft);
+      setPosition(enemyX + movement, enemyY);
+   } else {
+      setState(FallenHumanState::Idle);
    }
 
-   if(playerHitbox.findIntersection(enemyHitbox)){
-      if(!isAttacking && attackClock.getElapsedTime().asSeconds() >= attackCooldown){
-         if(playerP -> getPlayerX() > enemyX){ //checks if the player is further from the screen border than the enemy and if it is it means its on his right
-            setState(FallenHumanState::AttackRight);
-            isAttacking = true;
-            attackHitboxActive = false;
+   // Enemies gravity
+   if (isGrounded) {
+      const float enemyBottom = enemyY + enemyHeight;
+      bool supported = false;
+      for (const sf::FloatRect& collisionBox : collisionBoxes) {
+         const bool overlapsX = enemyX + hitboxOffsetX + hitboxW > collisionBox.position.x
+            && enemyX + hitboxOffsetX < collisionBox.position.x + collisionBox.size.x;
+         if (overlapsX && std::abs(enemyBottom - collisionBox.position.y) < 1.0f) {
+            supported = true;
+            break;
          }
-         else{
-            setState(FallenHumanState::AttackLeft);
-            isAttacking = true;
-            attackHitboxActive = false;
-         }
-         attackClock.restart();
+      }
+      if (!supported) {
+         isGrounded = false;
       }
    }
-   else{
-      if(enemyState == FallenHumanState::AttackRight || enemyState == FallenHumanState::AttackLeft){
-          setState(FallenHumanState::Idle);
-          isAttacking = false;
-           attackHitboxActive = false;
-      }
-      const float distanceToPlayer = playerP->getPlayerX() - enemyX;
-      const float frameDelta = std::min(deltaTime, 0.05f);
-      const float movement = std::clamp(distanceToPlayer, -speed * frameDelta * 60.0f,
-         speed * frameDelta * 60.0f);
 
-      if(std::abs(distanceToPlayer) <= 0.5f){
-         setState(FallenHumanState::Idle);
-      }
-      else if(distanceToPlayer > 0.0f){
-         if((playerP -> getPlayerX() - enemyX) <= triggetDistance){
-            setState(FallenHumanState::WalkRight);
-            setPosition(enemyX + movement, enemyY);
-           
-         }
-         else{
-            setState(FallenHumanState::Idle);
-         }
-      
-      }
-      else {
-         if((enemyX - playerP ->getPlayerX()) <= triggetDistance){
-            setState(FallenHumanState::WalkLeft);
-            setPosition(enemyX + movement, enemyY);
-         }
-         else{
-            setState(FallenHumanState::Idle);
-         }
-      }
-  }
+   if (!isGrounded) {
+      const float previousBottom = enemyY + enemyHeight;
+      verticalSpeed += gravity * distanceScale;
+      const float nextY = enemyY + verticalSpeed * distanceScale;
+      const float nextBottom = nextY + enemyHeight;
+      float landingY = nextY;
+      bool landed = false;
 
+      if (verticalSpeed >= 0.0f) {
+         for (const sf::FloatRect& collisionBox : collisionBoxes) {
+            const bool overlapsX = enemyX + hitboxOffsetX + hitboxW > collisionBox.position.x
+               && enemyX + hitboxOffsetX < collisionBox.position.x + collisionBox.size.x;
+            const bool crossesTop = previousBottom <= collisionBox.position.y
+               && nextBottom >= collisionBox.position.y;
+            if (overlapsX && crossesTop
+                && (!landed || collisionBox.position.y < landingY + enemyHeight)) {
+               landingY = collisionBox.position.y - enemyHeight;
+               landed = true;
+            }
+         }
+      }
+
+      if (landed) {
+         setPosition(enemyX, landingY);
+         verticalSpeed = 0.0f;
+         isGrounded = true;
+      } else {
+         setPosition(enemyX, nextY);
+      }
+   }
 }
 void FallenHuman::setState(FallenHumanState newState){
    if(enemyState != newState){
@@ -201,4 +223,3 @@ float FallenHuman::getFhHitboxWidth(){
 float FallenHuman::getAttackDamage() const{
    return attackDamage;
 }
-

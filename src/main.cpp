@@ -126,7 +126,8 @@ int main() {
                 player.checkCollisionWithEnemy(enemy.get());
                 enemy->checkCollisionsWithProjectiles(player.getProjectile());
                 enemy->handleDeath();
-                enemy->checkEnemyAndPlayerPosition(playerP, player.getPlayerX(), player.getPlayerY(), deltaTime);
+                enemy->checkEnemyAndPlayerPosition(playerP, player.getPlayerX(), player.getPlayerY(),
+                    deltaTime, room.getCollisionBoxes());
             }
         
     }

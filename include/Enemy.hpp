@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <iostream>
+#include <vector>
 class Player;
 
 //base class for any enemy
@@ -20,6 +21,9 @@ class Enemy{
      float immunityTime = 0.75f;
      float hitboxH;
      float hitboxW;
+     float verticalSpeed = 0.0f;
+     bool isGrounded = false;
+     static constexpr float gravity = 0.5f;
      bool isAttacking;
      sf::Texture enemyTexture;
      sf::Sprite enemySprite;
@@ -46,6 +50,8 @@ class Enemy{
      virtual void checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,float hitboxH,float hitboxW);
     virtual void updateAnimation();
     virtual void checkEnemyAndPlayerPosition(Player *playerP, float x, float y, float deltaTime);
+    virtual void checkEnemyAndPlayerPosition(Player *playerP, float x, float y, float deltaTime,
+        const std::vector<sf::FloatRect>& collisionBoxes);
     virtual void handleDeath();
     virtual bool getIsDead() const;
     virtual bool getIsAttacking() const;
