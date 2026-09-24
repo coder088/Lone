@@ -329,9 +329,10 @@ void Player::checkCollisionWithEnemy(Enemy *enemy){
         return;
     }
 
-    sf::FloatRect tempEnemyRect = enemy->getHitbox();
-   // sf::FloatRect tempEnemyAttackRect = fallenHumanP ->getAttackHitbox();
-    if(getPlayerHitbox().findIntersection(tempEnemyRect) /*|| getPlayerHitbox().findIntersection(tempEnemyAttackRect)*/){
+    const bool hitByAttack = enemy->getIsAttacking()
+        && getPlayerHitbox().findIntersection(enemy->getAttackHitbox());
+
+    if(hitByAttack){
         if(immunityClock.getElapsedTime().asSeconds() >= immunityCooldown){
         playerHp = std::max(0.0f, playerHp - enemy->getAttackDamage());
         if(playerHp <= 0.0f){

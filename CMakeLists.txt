@@ -17,6 +17,9 @@ add_executable(Lone
     src/Enemy.cpp
     src/FallenHuman.cpp
     src/Room.cpp)
+target_include_directories(Lone PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
 target_link_libraries(Lone PRIVATE SFML::Graphics SFML::Window SFML::System SFML::Audio)
 target_compile_definitions(Lone PRIVATE SFML_STATIC)
 

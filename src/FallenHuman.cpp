@@ -5,6 +5,8 @@
 #include "Enemy.hpp"
 #include "Player.hpp"
 #include "FallenHuman.hpp"
+#include <algorithm>
+#include <cmath>
 
 
    
@@ -12,6 +14,8 @@
       if(!enemyTexture.loadFromFile("assets/FallenHumanSS.png")){
          std::cerr << "an error occurrend while loading the enemy sprite sheet \n";
       }
+       speed = 4.5f;
+       triggetDistance = 150.f;
         attackDamage = 10;
         enemyHp = 100;
         enemySpeed = 4;
@@ -20,7 +24,7 @@
         enemyWidth = 100;
         enemyHeight = 100;
         hitboxH = 120;
-        hitboxW = 85;
+        hitboxW = 50;
         attackHitboxW = 50;
         attackHitboxH = 50;
 
@@ -33,12 +37,11 @@
         enemySprite.setPosition({enemyX, enemyY});
      }
 
-
+float FallenHuman::getSpeed(){return speed;}
 void FallenHuman::updateAnimation(){
-    // Gestisci lo stato di morte
     if(isDead){
       enemyState = FallenHumanState::Death;        
-        // Aggiorna i frame dell'animazione di morte
+   
         if(animationClock.getElapsedTime().asSeconds() >= frameDuration){
           if(currentSsColumn < totalSsColums - 1){
             currentSsColumn++;
@@ -62,39 +65,90 @@ void FallenHuman::updateAnimation(){
         enemySprite.setTextureRect(sf::IntRect({posX,posY},{ssFrameWidth,ssFrameHeight}));
         animationClock.restart();
 
-        // Se l'animazione di attacco è finita, torna a Idle
+      
         if((enemyState == FallenHumanState::AttackRight || enemyState == FallenHumanState::AttackLeft)
             && currentSsColumn == totalSsColums - 1){
             isAttacking = false;
+         attackHitboxActive = false;
             attackClock.restart();
             setState(FallenHumanState::Idle);
             }
+      else if(enemyState == FallenHumanState::AttackRight
+         || enemyState == FallenHumanState::AttackLeft){
+         attackHitboxActive = currentSsColumn == 2;
+      }
     }
 }
 
-void FallenHuman::checkEnemyAndPlayerPosition(Player *playerP,float x,float y){
-   sf::FloatRect playerHiboxRect = playerP -> getPlayerHitbox();
-   if(playerHiboxRect.findIntersection(getHitbox())){
-      // Controlla se il cooldown di attacco è trascorso
-      if(attackClock.getElapsedTime().asSeconds() >= attackCooldown){
+void FallenHuman::checkEnemyAndPlayerPosition(Player *playerP,float, float, float deltaTime){
+   if (playerP == nullptr || isDead) {
+      return;
+   }
+
+   const sf::FloatRect playerHitbox = playerP->getPlayerHitbox();
+   const sf::FloatRect enemyHitbox = getHitbox();
+   const bool canSeePlayerOnYAxis =
+      playerHitbox.position.y < enemyHitbox.position.y + enemyHitbox.size.y
+      && playerHitbox.position.y + playerHitbox.size.y > enemyHitbox.position.y;
+
+   if (!canSeePlayerOnYAxis) {
+      isAttacking = false;
+      attackHitboxActive = false;
+      setState(FallenHumanState::Idle);
+      return;
+   }
+
+   if(playerHitbox.findIntersection(enemyHitbox)){
+      if(!isAttacking && attackClock.getElapsedTime().asSeconds() >= attackCooldown){
          if(playerP -> getPlayerX() > enemyX){ //checks if the player is further from the screen border than the enemy and if it is it means its on his right
             setState(FallenHumanState::AttackRight);
             isAttacking = true;
+            attackHitboxActive = false;
          }
          else{
             setState(FallenHumanState::AttackLeft);
             isAttacking = true;
+            attackHitboxActive = false;
          }
          attackClock.restart();
       }
-  }
-  else{
-      // Il player si è allontanato, torna a Idle
+   }
+   else{
       if(enemyState == FallenHumanState::AttackRight || enemyState == FallenHumanState::AttackLeft){
           setState(FallenHumanState::Idle);
           isAttacking = false;
+           attackHitboxActive = false;
+      }
+      const float distanceToPlayer = playerP->getPlayerX() - enemyX;
+      const float frameDelta = std::min(deltaTime, 0.05f);
+      const float movement = std::clamp(distanceToPlayer, -speed * frameDelta * 60.0f,
+         speed * frameDelta * 60.0f);
+
+      if(std::abs(distanceToPlayer) <= 0.5f){
+         setState(FallenHumanState::Idle);
+      }
+      else if(distanceToPlayer > 0.0f){
+         if((playerP -> getPlayerX() - enemyX) <= triggetDistance){
+            setState(FallenHumanState::WalkRight);
+            setPosition(enemyX + movement, enemyY);
+           
+         }
+         else{
+            setState(FallenHumanState::Idle);
+         }
+      
+      }
+      else {
+         if((enemyX - playerP ->getPlayerX()) <= triggetDistance){
+            setState(FallenHumanState::WalkLeft);
+            setPosition(enemyX + movement, enemyY);
+         }
+         else{
+            setState(FallenHumanState::Idle);
+         }
       }
   }
+
 }
 void FallenHuman::setState(FallenHumanState newState){
    if(enemyState != newState){
@@ -113,16 +167,28 @@ void FallenHuman::handleDeath(){
 bool FallenHuman::getIsDead() const{
    return isDead && deathClock.getElapsedTime().asSeconds() >= deathAnimationDuration;
 }
+bool FallenHuman::getIsAttacking() const{
+   return attackHitboxActive
+      && (enemyState == FallenHumanState::AttackRight
+         || enemyState == FallenHumanState::AttackLeft);
+}
 void FallenHuman::setSsPosition(float x,float y){
-   enemySprite.setPosition({x,y});
+   setPosition(x, y);
+}
 
+void FallenHuman::setPosition(float x, float y){
+   enemyX = x;
+   enemyY = y;
+   enemySprite.setPosition({enemyX, enemyY});
 }
 sf::FloatRect FallenHuman::getHitbox() const{
    sf::FloatRect rect({enemyX,enemyY + hitboxH/2},{hitboxW,hitboxH});
    return rect;
 }
 sf::FloatRect FallenHuman::getAttackHitbox() const{
-   sf::FloatRect rect({enemyX + hitboxW,enemyY + hitboxH/2},{attackHitboxW,attackHitboxH});
+   const bool attacksRight = enemyState == FallenHumanState::AttackRight;
+   const float attackX = attacksRight ? enemyX + hitboxW : enemyX - attackHitboxW;
+   sf::FloatRect rect({attackX,enemyY + hitboxH/2},{attackHitboxW,attackHitboxH});
    return rect;
 }
 
@@ -135,5 +201,4 @@ float FallenHuman::getFhHitboxWidth(){
 float FallenHuman::getAttackDamage() const{
    return attackDamage;
 }
-
 

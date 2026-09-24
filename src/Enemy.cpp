@@ -3,7 +3,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <iostream>
 
-Enemy::Enemy() : enemySprite(enemyTexture){
+Enemy::Enemy() : isAttacking(false), enemySprite(enemyTexture){
     immunityClock.start();
 }
 
@@ -25,6 +25,7 @@ float Enemy::getEnemyX(){
 float Enemy::getEnemyY(){
     return enemyY;
 }
+float Enemy::getSpeed(){return speed;}
 
 void Enemy::drawEnemy(sf::RenderWindow &window){
     window.draw(enemySprite);
@@ -51,12 +52,16 @@ void Enemy::checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,flo
 
 void Enemy::updateAnimation() {}
 
-void Enemy::checkEnemyAndPlayerPosition(Player *, float, float) {}
+void Enemy::checkEnemyAndPlayerPosition(Player *, float, float, float) {}
 
 void Enemy::handleDeath() {}
 
 bool Enemy::getIsDead() const {
     return false;
+}
+
+bool Enemy::getIsAttacking() const {
+    return isAttacking;
 }
 
 sf::FloatRect Enemy::getHitbox() const {
@@ -70,5 +75,6 @@ sf::FloatRect Enemy::getAttackHitbox() const {
 float Enemy::getAttackDamage() const {
     return 0.0f;
 }
+void Enemy::setSsPosition(float x,float y){}
 
 

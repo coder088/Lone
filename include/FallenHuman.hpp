@@ -22,12 +22,14 @@ class FallenHuman : public Enemy{
    static constexpr   int totalSsColums = 4;
    static constexpr   int totalSsRows = 6;
    static constexpr float attackCooldown = 0.5f;
+   static constexpr float verticalVisionTolerance = 24.0f;
    static constexpr  float deathAnimationDuration = 1.0f;
     int currentSsColumn = 0;
     int currentSsRow = 0; 
     FallenHumanState enemyState = FallenHumanState::Idle;
     FallenHumanState previousState = FallenHumanState::Idle;
     bool isDead = false;
+    bool attackHitboxActive = false;
     sf::Clock deathClock;
     sf::Clock attackClock;
     int ssFrameHeight = 171;
@@ -38,18 +40,21 @@ class FallenHuman : public Enemy{
    public:
     FallenHuman(sf::Vector2f spawnPos);
     void updateAnimation() override;
-    void checkEnemyAndPlayerPosition(Player *playerP,float x,float y) override;
+    void checkEnemyAndPlayerPosition(Player *playerP,float x,float y,float deltaTime) override;
     void setState(FallenHumanState newState);
     void handleDeath() override;
     bool getIsDead() const override;
+    bool getIsAttacking() const override;
     void setSsPosition(float x,float y);
     sf::FloatRect getHitbox() const override;
     sf::FloatRect getAttackHitbox() const override;
     float getFhHitboxHeght();
     float getFhHitboxWidth();
     float getAttackDamage() const override;
+    float getSpeed() override;
 
-
+   private:
+    void setPosition(float x, float y);
 };
 
 

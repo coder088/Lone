@@ -9,7 +9,8 @@ class Player;
 //base class for any enemy
 class Enemy{
     protected:
-    
+     float speed;
+     float triggetDistance;
      float enemyHp;
      float enemySpeed;
      int enemyWidth;
@@ -39,16 +40,20 @@ class Enemy{
      virtual int getEnemyHeight();
      virtual float getEnemyX();
      virtual float getEnemyY();
+     virtual float getSpeed();
      virtual void drawEnemy(sf::RenderWindow &window);
     virtual void checkCollisionsWithProjectiles(std::vector<Projectile> &projvect);
      virtual void checkCollisionsWithProjectiles(std::vector<Projectile> &projvect,float hitboxH,float hitboxW);
     virtual void updateAnimation();
-    virtual void checkEnemyAndPlayerPosition(Player *playerP, float x, float y);
+    virtual void checkEnemyAndPlayerPosition(Player *playerP, float x, float y, float deltaTime);
     virtual void handleDeath();
     virtual bool getIsDead() const;
+    virtual bool getIsAttacking() const;
     virtual sf::FloatRect getHitbox() const;
     virtual sf::FloatRect getAttackHitbox() const;
     virtual float getAttackDamage() const;
+    virtual void setSsPosition(float x,float y);
+  
 
 };
 
